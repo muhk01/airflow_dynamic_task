@@ -1,6 +1,16 @@
 Dynamically Generate Task Using Dictionary Element in Airflow
 
-Suppose for example we want to execute some script with only one dependency, or more than one, in parallely.
+Suppose for example we want to execute multiple script in same manner in parallely,
+Instead to repeatly defining 
+
+```
+task_name = BashOperator(
+            task_id='task_name',
+            bash_command="{}/{} ".format()
+        )
+```
+
+We able to just create a dict which defining how many task we want to execute.
 
 ```
 sources = [
@@ -14,6 +24,17 @@ sources = [
     {"num": 2, "task_ingest_name": "table_data6.sh", "path_ingestion": "test2/path/", 
      "task_serving_name" : "serving_data3.sh", "path_serving" : "test1/path/"},
     ]
+```
+
+and then Loop for each dict element, to dynamically generate the Task.
+
+```
+for source in sources:
+    ingest_table = BashOperator(
+        task_id=f"ingestion_table_{source['task_ingest_name']}",
+        bash_command="{}/{} ".format({source['path_ingestion']}, {source['task_ingest_name']}),
+        dag=dag,
+    )
 ```
 
 Illustration for the result
